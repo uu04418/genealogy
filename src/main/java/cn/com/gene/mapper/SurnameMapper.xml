@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.gene.mapper.SurnameMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.gene.pojo.Surname" >
+    <id column="surnameid" property="surnameid" jdbcType="BIGINT" />
+    <result column="detailname" property="detailname" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    surnameid, detailname
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="cn.com.gene.pojo.SurnameExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from surname
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from surname
+    where surnameid = #{surnameid,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from surname
+    where surnameid = #{surnameid,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="cn.com.gene.pojo.SurnameExample" >
+    delete from surname
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="cn.com.gene.pojo.Surname" >
+    insert into surname (surnameid, detailname)
+    values (#{surnameid,jdbcType=BIGINT}, #{detailname,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="cn.com.gene.pojo.Surname" >
+    insert into surname
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="surnameid != null" >
+        surnameid,
+      </if>
+      <if test="detailname != null" >
+        detailname,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="surnameid != null" >
+        #{surnameid,jdbcType=BIGINT},
+      </if>
+      <if test="detailname != null" >
+        #{detailname,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="cn.com.gene.pojo.SurnameExample" resultType="java.lang.Integer" >
+    select count(*) from surname
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update surname
+    <set >
+      <if test="record.surnameid != null" >
+        surnameid = #{record.surnameid,jdbcType=BIGINT},
+      </if>
+      <if test="record.detailname != null" >
+        detailname = #{record.detailname,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update surname
+    set surnameid = #{record.surnameid,jdbcType=BIGINT},
+      detailname = #{record.detailname,jdbcType=VARCHAR}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="cn.com.gene.pojo.Surname" >
+    update surname
+    <set >
+      <if test="detailname != null" >
+        detailname = #{detailname,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where surnameid = #{surnameid,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cn.com.gene.pojo.Surname" >
+    update surname
+    set detailname = #{detailname,jdbcType=VARCHAR}
+    where surnameid = #{surnameid,jdbcType=BIGINT}
+  </update>
+</mapper>

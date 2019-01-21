@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.gene.mymapper.FansCustomerMapper" >
+
+	<!-- 查询赞的总数 -->
+    <select id="zanarryCount" resultType="integer" parameterType="long">
+		SELECT count(1)
+			from zan	
+			INNER JOIN `profile` on zan.userid = `profile`.userid
+		where zan.userid != #{userid} and zan.followuserid = #{userid} AND zan.state  = 1
+	</select>
+	
+	<select id="zanarry" resultType="cn.com.gene.queryvo.UserCustomer" parameterType="long">
+		SELECT zan.title  ,zan.updatetime , zan.userid , `profile`.avatar ,`profile`.username ,zan.otherid
+		,zan.type
+			from zan	
+			INNER JOIN `profile` on zan.userid = `profile`.userid
+		where zan.userid != #{userid} and zan.followuserid = #{userid} and zan.state  = 1
+		ORDER BY zan.updatetime desc 
+		<!-- 分页的查询条件 -->
+		<if test="pagequery !=null ">
+			limit #{pagequery.pagestart} , #{pagequery.pagesize}
+		</if>
+	</select>
+	
+	
+	
+	<!-- 查询访客的总数 -->
+    <select id="broarryCount" resultType="integer" parameterType="long">
+		SELECT COUNT(1) from browse
+			INNER JOIN `profile` on browse.userid = `profile`.userid 
+		where browse.userid !=  #{userid} AND browse.followuserid =  #{userid}
+	</select>
+	<select id="broarry" resultType="cn.com.gene.queryvo.UserCustomer" parameterType="long">
+				SELECT browse.title ,browse.type , browse.updatetime  ,`profile`.username , `profile`.avatar ,
+					browse.userid ,browse.otherid
+			from browse
+			INNER JOIN `profile` on browse.userid = `profile`.userid 
+		where browse.userid != #{userid} and browse.followuserid = #{userid}
+        ORDER BY browse.updatetime desc 
+		<!-- 分页的查询条件 -->
+		<if test="pagequery !=null ">
+			limit #{pagequery.pagestart} , #{pagequery.pagesize}
+		</if>
+	</select>
+	
+	
+	<!-- 查询粉丝的总数 -->
+    <select id="fansarryCount" resultType="integer" parameterType="long">
+		SELECT  COUNT(1) from `user`
+			LEFT JOIN `profile` on `user`.userid = `profile`.userid
+			INNER JOIN (
+				SELECT fans.userid ,fans.updatetime  from fans where fans.otherid = 1 and fans.state = 1
+				and fans.type = 11
+			) fans on fans.userid = `user`.userid 
+	</select>
+	
+	<select id="fansarry" resultType="cn.com.gene.queryvo.UserCustomer" parameterType="long">
+		SELECT `user`.userid , `profile`.avatar ,`profile`.username ,`profile`.updatetime  from `user`
+		LEFT JOIN `profile` on `user`.userid = `profile`.userid
+		INNER JOIN (
+			SELECT fans.userid ,fans.updatetime  from fans where fans.otherid = #{userid} and fans.state = 1
+			and fans.type = 11
+		) fans on fans.userid = `user`.userid 
+	ORDER BY  fans.updatetime desc 
+	<if test="pagequery !=null ">
+			limit #{pagequery.pagestart} , #{pagequery.pagesize}
+	</if>
+	</select>
+	
+	
+	
+	<!-- 查询关注的总数 -->
+    <select id="guanarryCount" resultType="integer" parameterType="long">
+		SELECT  count(1)
+		       from fans 
+			LEFT JOIN `profile` on fans.otherid = `profile`.userid and fans.type = 11
+			LEFT JOIN genemess on fans.otherid = genemess.genemessid and fans.type = 1 
+		where fans.userid = #{userid}
+			and state = 1 
+	</select>
+	
+	
+	<select id="guanarry" resultType="cn.com.gene.queryvo.UserCustomer" parameterType="long">
+				SELECT fans.otherid userid,
+				   fans.type ,
+				   IFNULL(`profile`.username,genemess.genename) username ,
+				   IFNULL(`profile`.avatar,genemess.picture) avatar
+		       from fans 
+			LEFT JOIN `profile` on fans.otherid = `profile`.userid and fans.type = 11
+			LEFT JOIN genemess on fans.otherid = genemess.genemessid and fans.type = 1 
+		where fans.userid = #{userid}
+			and state = 1 
+		ORDER BY fans.updatetime desc 
+	<if test="pagequery !=null ">
+			limit #{pagequery.pagestart} , #{pagequery.pagesize}
+	</if>
+	</select>
+	
+	
+	 <!-- 查询我收藏的的总数 -->
+	<select id="findMyEnshListCount" parameterType="long" resultType="integer">
+		SELECT COUNT(1) from enshrine where userid = #{userid} 
+		and state = 1 and enshrine.followuserid !=#{userid}
+	</select>
+	<select id="findMyEnshList" parameterType="long" resultType="cn.com.gene.queryvo.UserCustomer">
+		SELECT `profile`.username ,enshrine.title ,`profile`.userid , `profile`.avatar
+		 ,enshrine.updatetime ,enshrine.type ,enshrine.otherid
+			from enshrine INNER JOIN `profile` on enshrine.followuserid = `profile`.userid
+		
+			where  enshrine.userid = #{userid} and enshrine.state=1  and 
+		followUserId !=#{userid}  order by enshrine.updatetime desc 
+	</select>
+</mapper>

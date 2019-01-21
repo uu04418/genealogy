@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.gene.mymapper.VipCustomerMapper" >
+	
+	<!-- 查询获得积分的当天数据 -->
+	<select id="searchcurrntlength" resultType="integer" >
+			SELECT COUNT(1) from integral where TO_DAYS(updatetime) = TO_DAYS(NOW())
+            AND integral.userid = #{userid}  and integral.type = #{type} and state = 1
+	</select>
+	
+	
+  <!-- 查询我的钱包-->
+  <select id="searchmybure" resultType="cn.com.gene.queryvo.VipCustomer" parameterType="long">
+  		SELECT IFNULL(inteconn.count,'0') intecount ,
+  				vipcount.count ,vipcount.balance,vipcount.account
+			FROM vipcount 
+			LEFT JOIN inteconn ON vipcount.userid = inteconn.userid
+			where vipcount.userid = #{userid}
+  </select>
+  
+  <!-- 获取充值记录的订单号 -->
+  <select id="consumeorderNum" resultType="long">
+  	SELECT IFNULL(MAX(consumeid)+1,10000000) from consume
+  </select>
+  
+  
+  	<!-- 查询金币明细 -->
+	<select id="searchjinbimx" resultType="cn.com.gene.queryvo.VipCustomer" >
+			SELECT integral.`event` , integral.updatetime ,integral.state , integral.count
+				from integral 
+			where integral.userid = #{userid} and state in   (${state}   )
+			ORDER BY integral.updatetime desc 
+			<if test="pagequery !=null ">
+			limit #{pagequery.pagestart} , #{pagequery.pagesize}
+		    </if>
+	</select>
+	<select id="searchjinbimxCount" resultType="integer" >
+			SELECT count(1)
+				from integral 
+			where integral.userid = #{userid} and state in (  ${state}  ) 
+	</select>
+	
+	
+	<!-- 查询充值记录  和消费记录-->
+ 	<select id="searchrecharge"  resultType="cn.com.gene.queryvo.VipCustomer" >
+ 		SELECT consume.updatetime , consume.descname 'event' , consume.monetary 
+ 		 from consume where userid = #{userid} and type  in (${type})
+		ORDER BY consume.updatetime desc 
+		<if test="pagequery !=null ">
+			limit #{pagequery.pagestart} , #{pagequery.pagesize}
+		</if>
+ 	</select>
+ 	<select id="searchrechargeCount"  resultType="integer" parameterType="long">
+ 		SELECT count(1) from consume where userid = #{userid} and  type  in (${type})
+ 	</select>
+ 	
+ 	<!-- 查询收益记录 -->
+ 	<select id="mylurnce"  resultType="cn.com.gene.queryvo.VipCustomer" >
+			SELECT lucre.account ,
+			       lucre.descname 'event' ,
+			       lucre.updatetime 
+			   from lucre where lucre.userid =#{userid}  
+			ORDER BY lucre.updatetime desc 
+			<if test="pagequery !=null ">
+			limit #{pagequery.pagestart} , #{pagequery.pagesize}
+		</if>
+	</select>
+	<select id="mylurnceCount"  resultType="integer" >
+			SELECT count(1) from lucre where lucre.userid =#{userid}  
+	</select>
+ 	
+ 	
+ 	
+  
+</mapper>

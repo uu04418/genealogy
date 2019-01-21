@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.gene.mymapper.userCustomerMapper" >
+
+	<!-- 根据用户的电话查询用户的登录信息 -->
+	<select id="getUserMessagebytelephone" resultType="cn.com.gene.queryvo.UserCustomer" parameterType="string">
+		SELECT `user`.accesstoken , `profile`.signstate ,`profile`.username ,`profile`.realname 
+				,`user`.telephone , `user`.userid ,`user`.state ,`user`.phyAddress
+				from `user` 
+		LEFT JOIN `profile` on `user`.userid = `profile`.userid
+		where `user`.telephone = #{telephone}
+	</select>
+	
+	<!-- 根据用户的userid查询用户的登录信息 -->
+	<select id="getUserMessagebyuserid" resultType="cn.com.gene.queryvo.UserCustomer" parameterType="long">
+		SELECT `user`.accesstoken , `profile`.signstate ,`profile`.username ,`profile`.realname 
+				,`user`.telephone ,`profile`.profileid 
+				from `user` 
+		LEFT JOIN `profile` on `user`.userid = `profile`.userid
+		where `user`.userid = #{userid}
+	</select>
+	
+	<!-- 重置登录安全吗 -->
+	<update id="updateaccesstokenbytelephone"  parameterType="cn.com.gene.queryvo.UserCustomer">
+		UPDATE `user`  set accesstoken = #{accesstoken} ,state = 1  
+		 where telephone = #{telephone}
+	</update>
+	
+	
+  <!-- 根据用户的userid 查询用户基本信息 -->
+  <select id="getcommonusermess" resultType="cn.com.gene.queryvo.UserCustomer" parameterType="long" >
+  		SELECT `profile`.realname,
+				`user`.telephone ,
+				`profile`.identity ,
+				`user`.userid,
+				`profile`.sex ,
+				`profile`.signstate , 
+				`profile`.profileid
+		       from `user` LEFT JOIN `profile` on `user`.userid = `profile`.userid 
+			where  `user`.userid = #{userid}
+  </select>
+  
+  
+    <!-- 查询氏族中自己的基本信息 -->
+	<select id="searchgenemyself" resultType="cn.com.gene.queryvo.UserCustomer"  parameterType="long">
+		SELECT  `profile`.avatar ,`profile`.realname , `profile`.rankings ,  `profile`.zodiac ,
+					   `user`.telephone ,userconn.*  , education.educationname ,position.positionname 
+					  , `profile`.introduction , `profile`.birthday  ,`profile`.workunit
+				from `profile`
+			LEFT JOIN `user` on `user`.userid = `profile`.userid
+			LEFT JOIN userconn on userconn.profileid = `profile`.profileid
+			LEFT JOIN education on `profile`.educationid = education.educationid
+		  LEFT JOIN position on position.positionid = `profile`.positionid
+		where `profile`.profileid = #{profileid}
+	</select>
+	
+	<!-- 查询氏族中自己的基本信息 -->
+	<select id="searchgeneuser" resultType="cn.com.gene.queryvo.UserCustomer"  parameterType="java.util.List">
+		SELECT  `profile`.avatar ,`profile`.realname ,`profile`.sex,
+					   `user`.telephone ,userconn.*
+				from `profile`
+			LEFT JOIN `user` on `user`.userid = `profile`.userid
+			LEFT JOIN userconn on userconn.profileid = `profile`.profileid
+		where `profile`.profileid = #{profileid}
+	</select>
+	
+	
+	<!-- 查询氏族中兄弟姐妹 -->
+	<select id="searchmybrothers" resultType="cn.com.gene.queryvo.UserCustomer"  parameterType="long">
+		SELECT  `profile`.avatar ,`profile`.realname , `profile`.rankings ,`profile`.sex,
+							   `user`.telephone ,userconn.*
+		from `profile`
+			LEFT JOIN `user` on `user`.userid = `profile`.userid 
+			LEFT JOIN userconn on userconn.profileid = `profile`.profileid
+		where `profile`.profileid in (
+		SELECT profileid from userconn where  fatherid = #{fatherid} and profileid != #{profileid}
+		)
+	</select>
+	
+	
+	<!-- 查询氏族孙子 -->
+	<select id="searchmysons" resultType="cn.com.gene.queryvo.UserCustomer"  parameterType="long">
+		SELECT  `profile`.avatar ,`profile`.realname , `profile`.rankings ,`profile`.sex,
+					   `user`.telephone ,userconn.*
+				from `profile`
+			LEFT JOIN `user` on `user`.userid = `profile`.userid
+			LEFT JOIN userconn on userconn.profileid = `profile`.profileid
+			where`profile`.profileid  in  (
+				SELECT profileid from userconn where userconn.fatherid in 
+				<foreach item="item" collection="idlist" separator="," open="("
+			close=")" index="">
+			#{item, jdbcType=VARCHAR}
+		</foreach>
+			)
+	</select>
+	
+	
+	<!-- 更新之前回显数据 -->
+	<select id="searchupdatemess" resultType="cn.com.gene.queryvo.UserCustomer"  parameterType="long">
+		SELECT  `user`.telephone ,
+				`profile`.realname ,
+         `profile`.signstate ,
+         `profile`.educationid,
+         `profile`.birthday,
+         `profile`.username , 
+          `profile`.rankings,
+         `profile`.positionid ,
+         `profile`.sex ,
+         `profile`.weixinnub ,
+          `profile`.workunit ,
+          `profile`.zodiac ,
+          `profile`.avatar ,
+           IFNULL(`profile`.latitude,22)latitude  ,
+	       IFNULL(`profile`.longitude,44)  longitude,
+            `profile`.introduction ,
+         `profile`.profileid , 
+          position.positionname ,
+					education.educationname
+		from `profile` LEFT JOIN `user`  on `user`.userid = `profile`.userid
+		    LEFT JOIN position on position.positionid = `profile`.positionid
+				LEFT JOIN education on education.educationid = `profile`.educationid
+		where `profile`.profileid = #{profileid}
+	</select>
+	
+	
+	<!-- 查询通讯录 -->
+	<select id="searchphone" resultType="cn.com.gene.queryvo.UserCustomer"  parameterType="long">
+		SELECT  `profile`.avatar ,
+		        `profile`.realname  ,
+		        `user`.telephone 
+
+				from `profile` LEFT JOIN `user` on `user`.userid = `profile`.userid
+			where `profile`.profileid in (
+				SELECT profileid from genemessconn where genemessconn.genemessid  = #{genemessid}
+			) and `user`.telephone is not null  and `user`.state = 1
+	</select>
+	
+	
+	<!-- 同步userid -->
+	<update id="sysnfatherid"   parameterType="long">
+		UPDATE userconn set fatherid =#{newuserid}  where fatherid = #{userid}
+	</update>
+	
+	<update id="sysnuserid"   parameterType="long">
+		UPDATE userconn set userid =#{newuserid}  where userid = #{userid}
+	</update>
+	
+	<update id="sysnspouceid"   parameterType="long">
+		UPDATE userconn set spouseid = #{newuserid} where spouseid = #{userid}
+	</update>
+	
+	<!-- 进入个人中心查询用户基本资料 -->
+	<select id="searchinfo" resultType="cn.com.gene.queryvo.UserCustomer"  parameterType="long">
+		SELECT `profile`.username , `profile`.avatar  ,zan.zancount ,fan.fancount ,guan.guancount ,
+				IFNULL (bro.brocount , 0)brocount
+			from `user`  
+			LEFT JOIN `profile` on `user`.userid = `profile`.userid
+			JOIN (
+				select count(*) zancount from zan where followUserid=   #{userid} and state='1' 
+				and userid  != #{userid}
+			) zan
+			JOIN (
+				select count(*) fancount from fans where fans.otherid =  #{userid} and fans.state='1' AND TYPE = 11
+			) fan
+			JOIN (
+			  select count(*)guancount from fans where userid=  #{userid} and fans.state='1'
+			)guan
+			 JOIN(
+				SELECT SUM(bcount)brocount from browse where followuserid =  #{userid}
+ 			 ) bro
+		where `user`.userid = #{userid}
+	</select>
+	
+	
+	
+	<!-- 查询我的收益列表 -->
+	<select id="getmaxuserlevel" resultType="cn.com.gene.pojo.Invite" parameterType="long">
+		SELECT IFNULL(MAX(`level`),'0')`level` ,userid   from invite where followuserid =  #{userid}
+	</select>
+	
+	
+	<!-- 查询我的收益列表 -->
+	<select id="searchminlevel" resultType="cn.com.gene.pojo.Invite" parameterType="long">
+		SELECT MIN(`level`) `level` ,userid   from invite where  userid = #{userid}
+		LIMIT  0 ,1 
+	</select>
+	
+	<!-- 查询我的团队 -->
+	<select id="myteam" resultType="cn.com.gene.queryvo.UserCustomer" >
+		SELECT `profile`.username , `profile`.avatar ,invite.account 
+				,`profile`.userid 
+	from invite 
+	LEFT JOIN `user` on invite.followuserid = `user`.userid
+		LEFT JOIN `profile` on `profile`.userid = `user`.userid
+	where invite.`level`  in ( ${searchwhere} ) and invite.userid =  #{userid} 
+		<!-- 分页的查询条件 -->
+		<if test="pagequery !=null ">
+			limit #{pagequery.pagestart} , #{pagequery.pagesize}
+		</if>
+	</select>
+	<select id="myteamCount" resultType="integer" >
+		SELECT  count(1)
+	from invite 
+	LEFT JOIN `user` on invite.followuserid = `user`.userid
+		LEFT JOIN `profile` on `profile`.userid = `user`.userid
+	where invite.`level`  in ( ${searchwhere} ) and invite.userid =  #{userid} 
+	</select>
+	
+	<!-- 我的二级团队 -->
+	<select id="myteamson" resultType="cn.com.gene.queryvo.UserCustomer" >
+		SELECT invite.account inmonetary , `profile`.username ,`profile`.avatar 
+		,`profile`.userid ,invite.account 
+		 from invite 
+		LEFT JOIN `profile` on invite.followuserid = `profile`.userid
+	where invite.userid = #{sessionid}
+	and invite.followuserid in ( SELECT followuserid from invite where invite.userid = #{userid})
+	and invite.`level` = 2
+		<!-- 分页的查询条件 -->
+		<if test="pagequery !=null ">
+			limit #{pagequery.pagestart} , #{pagequery.pagesize}
+		</if>
+	</select>
+	<select id="myteamsonCount" resultType="integer" >
+		SELECT count(1) from invite 
+		LEFT JOIN `profile` on invite.followuserid = `profile`.userid
+	where invite.userid = #{sessionid}
+	and invite.followuserid in ( SELECT followuserid from invite where invite.userid = #{userid})
+	and invite.`level` = 2
+	</select>
+	
+	<!-- 校验兄弟姐妹是否有重复的排行和姓名 -->
+	<select id="checknameandraking" resultType="cn.com.gene.queryvo.UserCustomer" >
+		SELECT `profile`.username ,`profile`.userid from `profile`
+			where `profile`.userid in (
+		SELECT userid from userconn 
+		where userconn.fatherid =  (
+		SELECT IFNULL(fatherid,-1000) from userconn where  userid =#{userid} 
+			LIMIT 0 , 1 
+		)  and ( `profile`.rankings = #{rankings} or `profile`.realname = #{realname} )
+		
+		)  and `profile`.userid != #{expertid}
+		LIMIT 0 ,1 
+		
+	</select>
+	
+	
+	<!-- 校验用户token是否正确 -->
+	<select id="checktoken" resultType="cn.com.gene.queryvo.UserCustomer" >
+		SELECT `user`.userid ,`user`.updatetime from `user` where telephone =#{telephone}
+		and accesstoken = #{accesstoken}
+         LIMIT 0 , 1 
+	</select>
+	
+	
+ 
+</mapper>

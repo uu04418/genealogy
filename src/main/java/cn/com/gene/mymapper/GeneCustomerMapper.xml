@@ -1,0 +1,385 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.gene.mymapper.GeneCustomerMapper" >
+
+
+	<!-- 根据真实姓名查询所有的姓氏 -->
+	<select id="searchsurname" resultType="cn.com.gene.pojo.Surname" parameterType="cn.com.gene.pojo.Surname">
+		SELECT * from surname 
+		<if test="detailname != null and detailname != ''">
+			where detailname like  CONCAT('',#{detailname},'%')
+		</if>
+	</select>
+	
+	
+	<!-- 维护配偶 -->
+	<select id="updatewife"  parameterType="long">
+		 update userconn set spouseid =  #{spouseid}  where profileid = #{profileid}
+	</select>
+	
+	<!-- 维护父亲 -->
+	<select id="updatefatherbyuserid"  parameterType="long">
+		 update userconn set fatherid =  #{fatherid}  where profileid = #{profileid}
+	</select>
+	
+	
+	 <!--查询兄弟姐妹的父ID -->
+	<select id="getfatheridbybrotherids" parameterType="java.util.List"
+		resultType="long">
+			SELECT DISTINCT fatherid from userconn
+			where userid in 
+		<foreach item="item" collection="idsList" separator="," open="("
+			close=")" index="">
+			#{item, jdbcType=VARCHAR}
+		</foreach>
+		and  fatherid is not null
+	</select>
+	
+	 <!--更新兄弟姐妹一个父亲 -->
+	<update id="updatefatherbyuserids" parameterType="java.util.List"
+		>
+			UPDATE userconn set fatherid = #{fatherid}  where userid in 
+		<foreach item="item" collection="idsList" separator="," open="("
+			close=")" index="">
+			#{item, jdbcType=VARCHAR}
+		</foreach>
+	</update>
+	
+	
+		
+	
+	
+	<!--查询初代氏族 -->
+	<select id="firstgene" parameterType="long"
+		resultType="cn.com.gene.queryvo.UserCustomer">
+			SELECT    IFNULL(`user`.state,1) state,
+				   `profile`.profileid,
+				   `profile`.realname,
+				   `profile`.avatar ,
+				   userconn.spouseid 
+				   from userconn 
+				LEFT JOIN `profile` on userconn.profileid = `profile`.profileid
+				LEFT JOIN  `user` on `user`.userid = `profile`.userid
+				where userconn.fatherid is null 
+			 and userconn.profileid in (
+				SELECT  IFNULL(profileid,'-100')   from genemessconn where genemessid = #{genemessid}
+				and genemessconn.state in (1,2)
+			)
+	</select>
+	
+	<!--根据上级氏族查询下级氏族 -->
+	<select id="searchnextgene" parameterType="java.util.List"
+		resultType="cn.com.gene.queryvo.UserCustomer">
+			SELECT IFNULL(`user`.state ,1)state,
+				   `profile`.profileid ,
+				   `profile`.realname,
+				   `profile`.avatar ,
+				   userconn.spouseid
+			 from userconn 
+			LEFT JOIN `profile` on  userconn.profileid = `profile`.profileid
+			LEFT JOIN  `user` on `user`.userid = `profile`.userid
+		where fatherid  in 
+		<foreach item="item" collection="idsList" separator="," open="("
+			close=")" index="">
+			#{item, jdbcType=VARCHAR}
+		</foreach>
+	</select>
+	
+	<!--根据userid 查询氏族信息 -->
+	<select id="searchuserbyuserid" parameterType="long"
+		resultType="cn.com.gene.queryvo.UserCustomer">
+			SELECT    IFNULL(`user`.state,1) state,
+				   `profile`.realname,
+				   `profile`.avatar ,
+				    `profile`.profileid 
+			 from `profile` LEFT JOIN `user`  	on `user`.userid = `profile`.userid
+			where `profile`.profileid  = #{profileid}
+	</select>
+	
+	<!--  根据家族ID 查询家族基本信息 -->
+	<select id="searchgenemess"  resultType="cn.com.gene.queryvo.GenemessCustomer" parameterType="cn.com.gene.queryvo.GenemessCustomer">
+		SELECT      SUM(browse.bcount) totalcount ,
+			        genemess.picture ,
+	                genemess.genename ,
+			        IFNULL(t.pastcount,0) pastcount ,
+		            genemess.genemessid ,
+                    genemess.profileid ,
+                    genemess.surnameid
+		from browse 
+	    LEFT JOIN ( SELECT COUNT(1) pastcount, otherid FROM
+				browse WHERE DATEDIFF(updatetime, NOW()) >= 0 
+				AND DATEDIFF(updatetime, NOW()) &lt; 2  AND	browse.type = #{type}
+				AND browse.otherid = #{genemessid}
+		) t ON t.otherid = browse.otherid
+	   LEFT JOIN genemess on browse.otherid = genemess.genemessid
+       where browse.type = #{type} and browse.otherid = #{genemessid}
+	</select>
+	
+	
+	<!--查询加入氏族的成员 -->
+	<select id="searchgeneuser" parameterType="long"
+		resultType="cn.com.gene.queryvo.UserCustomer">
+			SELECT 
+			           `profile`.avatar ,
+			           `profile`.username,
+			           `user`.userid ,
+	                    genemessconn.state
+				from genemessconn
+			INNER JOIN `profile` on genemessconn.profileid = `profile`.profileid
+			INNER JOIN `user` on `user`.userid = `profile`.userid
+		where genemessconn.genemessid = #{genemessid}   and `user`.state  =  1 
+		ORDER BY genemessconn.state asc
+			LIMIT 0 ,4  
+	</select>
+	
+	<!-- 氏族列表页面 -->
+	<select id="genearray" resultType="cn.com.gene.queryvo.GenemessCustomer" parameterType="cn.com.gene.queryvo.GenemessVo">
+			SELECT detailaddress.detailes ,
+				   genemess.genemessid ,
+			       genemess.picture ,
+			       genemess.genename ,
+			       genemess.updatetime ,
+                   IFNULL(browse.totalcount,0)totalcount
+			from genemess 
+			LEFT JOIN detailaddress on genemess.detailid = detailaddress.detailid
+			LEFT JOIN surname ON surname.surnameid = genemess.surnameid
+			LEFT JOIN (
+					  SELECT IFNULL(SUM(bcount),0) totalcount ,browse.otherid  from browse 
+						where browse.type = 1 
+						GROUP BY browse.otherid
+			) browse on browse.otherid = genemess.genemessid
+		where 1=1 
+		<!-- 氏族查询条件 -->
+		<include refid="cn.com.gene.mymapper.SearchWhere.query_genemess_where" />
+		<!-- 姓氏ID的查询条件 -->
+		<include refid="cn.com.gene.mymapper.SearchWhere.query_surname_where" />
+		ORDER BY
+		<if test="hortorderby !=null and hortorderby !='' ">
+			browse.totalcount ${hortorderby} ,
+		</if>
+		 genemess.updatetime desc 
+		<!-- 分页的查询条件 -->
+		<if test="pagequery !=null ">
+			limit #{pagequery.pagestart} , #{pagequery.pagesize}
+		</if>
+	</select>
+	
+	<!-- 氏族列表页面 -->
+	<select id="genearrayCount" resultType="integer" parameterType="cn.com.gene.queryvo.GenemessVo">
+		SELECT  count(1)
+			from genemess 
+			LEFT JOIN detailaddress on genemess.detailid = detailaddress.detailid
+			LEFT JOIN surname ON surname.surnameid = genemess.surnameid
+		where 1=1 
+		<!-- 氏族查询条件 -->
+		<include refid="cn.com.gene.mymapper.SearchWhere.query_genemess_where" />
+		<!-- 姓氏ID的查询条件 -->
+		<include refid="cn.com.gene.mymapper.SearchWhere.query_surname_where" />
+	</select>
+	
+	
+	<!-- 查询所有的姓氏 -->
+	<select id="surnames" resultType="cn.com.gene.pojo.Surname" parameterType="cn.com.gene.queryvo.GenemessVo">
+			SELECT * from surname
+				ORDER BY surname.surnameid asc  
+		<if test="pagequery !=null ">
+			limit #{pagequery.pagestart} , #{pagequery.pagesize}
+		</if>
+	</select>
+	<!-- 查询所有的姓氏 -->
+	<select id="surnamesCount" resultType="integer" parameterType="cn.com.gene.queryvo.GenemessVo">
+			SELECT count(1) from surname
+				
+	</select>
+	
+	
+	<!-- 我加入氏族的氏族列表页面 -->
+	<select id="mygenearray" resultType="cn.com.gene.queryvo.GenemessCustomer">
+		SELECT detailaddress.detailes ,
+			   genemess.genemessid ,
+		       genemess.picture ,
+		       genemess.genename ,
+		       genemess.updatetime
+			from genemess 
+			LEFT JOIN detailaddress on genemess.detailid = detailaddress.detailid
+			LEFT JOIN surname ON surname.surnameid = genemess.surnameid
+		where  genemess.genemessid in (  ${genemessids} )
+		 <if test="pagequery !=null ">
+			limit #{pagequery.pagestart} , #{pagequery.pagesize}
+		</if>
+	</select>
+	<select id="mygenearrayCount" resultType="integer" parameterType="string">
+		SELECT  count(1)
+			from genemess 
+			LEFT JOIN detailaddress on genemess.detailid = detailaddress.detailid
+			LEFT JOIN surname ON surname.surnameid = genemess.surnameid
+		where  genemess.genemessid in (  ${genemessids} )
+	</select>
+	
+	
+	
+	<!-- 校验是否是氏族成员 -->
+	<select id="checkgeneuser" resultType="cn.com.gene.pojo.Genemessconn" parameterType="long">
+		SELECT * from genemessconn where genemessid = #{genemessid} and profileid = #{profileid}
+		and genemessconn.state in (1 , 2 ,3) 
+	</select>
+	
+	
+	<!-- 校验兄弟姐妹是否占用 -->
+	<select id="checkbrother" resultType="cn.com.gene.queryvo.UserCustomer" parameterType="long">
+				SELECT * from `profile` 
+				 where `profile`.userid in (
+					${userid}
+				 ) and  (`profile`.realname = #{realname} or `profile`.rankings =#{rankings} ) 
+				 and userid !=#{myid}
+	</select>
+	
+	
+	<!-- 地图找氏族成员 -->
+	<select id="searchgeneusermap" resultType="cn.com.gene.queryvo.UserCustomer" parameterType="long">
+			SELECT genemessconn.profileid , 
+			       IFNULL(`profile`.realname,`profile`.username)realname , 
+		           `profile`.avatar ,
+				   IFNULL(`profile`.latitude,22) latitude,
+				   IFNULL(`profile`.longitude,44) longitude 
+			from genemessconn 
+			INNER JOIN `profile` on genemessconn.profileid = `profile`.profileid
+		where genemessconn.genemessid = #{genemessid} 
+			and genemessconn.state in (1 , 2 ,  3 ) 
+	</select>
+	
+	
+	<select id="searchgenesignuser" resultType="cn.com.gene.queryvo.UserCustomer" parameterType="cn.com.gene.queryvo.GenemessVo">
+				SELECT 
+			           `profile`.avatar ,
+			           `profile`.username,
+			           `user`.userid ,
+	                genemessconn.state ,
+						IFNULL(usersign.signcount,0)signcount
+				from genemessconn
+			INNER JOIN `profile` on genemessconn.profileid = `profile`.profileid
+			INNER JOIN `user` on `user`.userid = `profile`.userid
+			LEFT JOIN (
+					SELECT IFNULL(SUM(usersign.singcount),0)signcount , userid ,otherid  FROM usersign 
+						where  usersign.type = 1
+					GROUP BY usersign.otherid , usersign.userid
+			) usersign on usersign.otherid = genemessconn.genemessid and usersign.userid = `user`.userid
+		where genemessconn.genemessid = #{genemessid}   and `user`.state  =  1 
+		ORDER BY usersign.signcount desc  
+	    <if test="pagequery !=null ">
+			limit #{pagequery.pagestart} , #{pagequery.pagesize}
+		</if>
+	</select>
+	
+	
+	<select id="searchgenesignuserCount" resultType="integer" parameterType="cn.com.gene.queryvo.GenemessVo">
+			SELECT  count(1)
+				from genemessconn
+			INNER JOIN `profile` on genemessconn.profileid = `profile`.profileid
+			INNER JOIN `user` on `user`.userid = `profile`.userid
+			LEFT JOIN (
+					SELECT IFNULL(SUM(usersign.singcount),0)signcount , userid ,otherid  FROM usersign 
+						where  usersign.type = 1
+					GROUP BY usersign.otherid , usersign.userid
+			) usersign on usersign.otherid = genemessconn.genemessid and usersign.userid = `user`.userid
+		where genemessconn.genemessid = #{genemessid}   and `user`.state  =  1 
+	</select>
+	
+	
+	<!-- 查询学历的统计 -->
+	<select id="honorpostype" resultType="cn.com.gene.queryvo.PosCustomer" parameterType="long">
+			SELECT COUNT(1)totalcount , 
+				position.positionname typename ,
+				position.positionid typeid ,
+		        2 typestate 
+		
+				from `profile` 
+			LEFT JOIN position on position.positionid = `profile`.positionid
+		
+			where `profile`.profileid in (
+			SELECT profileid from genemessconn where genemessconn.genemessid =#{genemessid}
+			and genemessconn.state in (1 , 2 )
+			) and position.fatherid = #{fatherid}
+				GROUP BY `profile`.positionid
+	</select>
+
+
+		<!-- 查询学历的统计 -->
+	<select id="honoredutype" resultType="cn.com.gene.queryvo.PosCustomer" parameterType="long">
+							SELECT COUNT(1) totalcount, 
+					   education.educationname typename ,
+					   education.educationid typeid , 
+				       1 typestate 
+		
+				from `profile` 
+			LEFT JOIN education on `profile`.educationid = education.educationid
+			where `profile`.profileid in (
+			SELECT profileid from genemessconn where genemessconn.genemessid = #{genemessid}   
+			and genemessconn.state in (1 , 2 )
+		     )
+			GROUP BY `profile`.educationid
+	</select>
+	
+	
+	<!-- 改变成员在家族中的地位 -->
+	<update id="changegeneusersate" parameterType="cn.com.gene.pojo.Genemessconn">
+			UPDATE genemessconn set state = #{state} 
+			where genemessid =#{genemessid} and genemessconn.profileid = #{profileid}
+	</update>
+  
+  
+    <!-- 同步氏族信息 -->
+	<update id="synchuserid" parameterType="long">
+			UPDATE genemessconn SET userid = #{newuserid} where userid = #{userid}
+	</update>
+	
+	
+	 <!-- 荣恩录查询职业名称的对应用户名字 -->
+	<select id="searchhonorposname" parameterType="long" resultType = "string">
+			SELECT `profile`.realname from `profile` where profileid in (
+				SELECT profileid from genemessconn where genemessid = #{genemessid} and  state in (1,2)
+			) and `profile`.positionid = #{positionid}
+	</select>
+	
+	 <!-- 荣恩录查询职业名称的对应用户名字 -->
+	<select id="searchhonoreduname" parameterType="long" resultType = "string">
+			SELECT `profile`.realname from `profile` where profileid in (
+				SELECT profileid from genemessconn where genemessid = #{genemessid} and  state in (1,2)
+			) and `profile`.educationid = #{educationid}
+	</select>
+	
+	 <!-- 荣恩录查询第一级职称-->
+	<select id="honorpostfatherype" parameterType="long" resultType = "cn.com.gene.queryvo.PosCustomer">
+		SELECT position.positionname typename ,position.positionid typeid from position where positionid in (
+			SELECT DISTINCT fatherid from position where positionid in (
+			SELECT DISTINCT positionid from genemessconn 
+				INNER JOIN `profile` on genemessconn.profileid =  `profile`.profileid
+		  where genemessid = #{genemessid} 
+		)
+		)
+	</select>
+	
+	
+	<!-- 校验是否是氏族成员 -->
+	<select id="checkaddgene" resultType="cn.com.gene.pojo.Genemess" >
+		SELECT genemessconn.genemessid ,genemess.genename from genemessconn 
+	LEFT JOIN genemess on genemess.genemessid = genemessconn.genemessid
+	LEFT JOIN surname  on genemess.surnameid = surname.surnameid
+	where genemessconn.profileid = #{profileid} and state in (1 , 2 )
+	and ( surname.detailname LIKE CONCAT('%',#{likenameone},'%') or  
+		  surname.detailname LIKE CONCAT('%',#{likenametwo},'%')
+	 ) LIMIT 0 ,1 
+	</select>
+	
+	
+	<!-- 查询当前氏族成员的基本信息-->
+	<select id="searchcheckduser" resultType="cn.com.gene.queryvo.UserCustomer" parameterType="long">
+				SELECT `profile`.rankings ,`profile`.sex  ,userconn.* 
+			from `profile` 
+			LEFT JOIN userconn on userconn.profileid = `profile`.profileid
+		where `profile`.profileid = #{profileid}
+	</select>
+	
+	
+	
+</mapper>

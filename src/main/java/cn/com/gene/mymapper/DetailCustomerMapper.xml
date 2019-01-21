@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.gene.mymapper.DetailCustomerMapper" >
+
+
+	<!-- 查询发布的列表 -->
+	<select id="searchdetail" resultType="cn.com.gene.queryvo.DetailCustomer" parameterType="cn.com.gene.queryvo.DetailVo">
+			SELECT      detailcontent.title,
+			           `profile`.username ,
+	                    detailcontent.detailcontentid ,
+                        detailcontent.picture ,
+                        detailcontent.updatetime ,
+                        `profile`.avatar ,
+                        `user`.telephone  ,
+                        detailaddress.detailes ,
+					    IFNULL(brosearch.brocount,0)   brocount ,
+						IFNULL(zansearch.zancount,0)   zancount ,
+						IFNULL(messsearch.messcount,0) messcount ,
+						detailtype.typename ,
+						genemess.genename
+				from detailcontent
+			LEFT JOIN `user` on `user`.userid = detailcontent.userid
+		  LEFT JOIN `profile` on `profile`.userid = `user`.userid
+			LEFT JOIN detailaddress on detailaddress.detailid = detailcontent.detailid
+			LEFT JOIN genemess on genemess.genemessid = detailcontent.genemessid
+			LEFT JOIN detailtype on detailtype.detailtypeid = detailcontent.detailtypeid
+			LEFT JOIN (
+					SELECT SUM(bcount)brocount , browse.otherid  from browse where browse.type = 2 
+	                GROUP BY browse.otherid 
+			) brosearch on brosearch.otherid = detailcontent.detailcontentid
+			LEFT JOIN (
+				SELECT COUNT(1)zancount , zan.otherid  from zan  where zan.type = 2 and zan.state = 1  
+				GROUP BY zan.otherid
+	        ) zansearch  on zansearch.otherid = detailcontent.detailcontentid
+			LEFT JOIN (
+					SELECT COUNT(1) messcount , otherid  from messages where messages.type = 2 
+	                GROUP BY messages.otherid
+			) messsearch on messsearch.otherid = detailcontent.detailcontentid
+			where 1=1  and detailcontent.state = 1
+			<!-- 发布类型的查询条件 -->
+			<include refid="cn.com.gene.mymapper.SearchWhere.query_detailtype_where" />
+			<!-- 发布content的条件 -->
+			<include refid="cn.com.gene.mymapper.SearchWhere.query_detailcontent_where" />
+			<!-- 家族的查询条件 -->
+			<include refid="cn.com.gene.mymapper.SearchWhere.query_genemess_where"/>
+			ORDER BY detailcontent.updatetime desc 
+		<if test="pagequery !=null ">
+			limit #{pagequery.pagestart} , #{pagequery.pagesize}
+		</if>
+	</select>
+	
+	<!-- 查询发布的列表 -->
+	<select id="searchdetailCount" resultType="integer" parameterType="cn.com.gene.queryvo.DetailVo">
+			SELECT      count(1)
+				from detailcontent
+			LEFT JOIN `profile` on detailcontent.userid = `profile`.userid 
+			LEFT JOIN `user` on `user`.userid = `profile`.userid
+			LEFT JOIN detailaddress on detailaddress.detailid = detailcontent.detailid
+			LEFT JOIN detailtype on detailtype.detailtypeid = detailcontent.detailtypeid
+			LEFT JOIN genemess on genemess.genemessid = detailcontent.genemessid
+			where 1=1 and detailcontent.state = 1
+			<!-- 发布类型的查询条件 -->
+			<include refid="cn.com.gene.mymapper.SearchWhere.query_detailtype_where" />
+			<!-- 发布content的条件 -->
+			<include refid="cn.com.gene.mymapper.SearchWhere.query_detailcontent_where" />
+			<!-- 家族的查询条件 -->
+			<include refid="cn.com.gene.mymapper.SearchWhere.query_genemess_where"/>
+	</select>
+	
+	
+	<!-- 查询的详情 -->
+	<select id="detailcontentbyid" resultType="cn.com.gene.queryvo.DetailCustomer" parameterType="long">
+			    SELECT  detailcontent.detailcontent,
+						detailcontent.title,
+			            `profile`.username ,
+	                    detailcontent.detailcontentid ,
+                        detailcontent.picture ,
+                        detailcontent.updatetime ,
+                        `profile`.avatar ,
+                        `user`.telephone  ,
+                        detailaddress.detailes ,
+                        detailcontent.userid ,
+					    SUM(browse.bcount) brocount ,detailtype.typename ,
+					    genemess.genename ,
+					    genemess.genemessid
+					from detailcontent
+				LEFT JOIN `user` on detailcontent.userid = `user`.userid
+				LEFT JOIN `profile` on `profile`.userid = detailcontent.userid
+				LEFT JOIN  detailaddress on detailaddress.detailid = detailcontent.detailid
+				LEFT JOIN detailtype on detailtype.detailtypeid = detailcontent.detailtypeid
+				LEFT JOIN browse on browse.otherid = detailcontent.detailcontentid
+				LEFT JOIN genemess on genemess.genemessid = detailcontent.genemessid
+			where  detailcontent.detailcontentid = #{detailcontentid} and browse.type = 2 
+	</select>
+	
+	
+	<select id="searchdetailtype" resultType="cn.com.gene.pojo.Detailtype" parameterType="string">
+		SELECT * from detailtype where detailtype.type = #{type} 
+		<if test="liketype != null and liketype != '' ">
+			AND detailtype.detailtypeid in ( ${liketype} )
+		</if>
+	</select>
+	
+	<select id="searchposbyfatherid" resultType="cn.com.gene.queryvo.PosCustomer" parameterType="long">
+			SELECT * from position where fatherid = #{fatherid}
+	</select>
+	
+	
+	
+		<!-- 查询相册-->
+	<select id="searchpicCount" resultType="integer" parameterType="long">
+			SELECT count(1) from detailcontent 
+				LEFT JOIN detailtype on detailcontent.detailtypeid = detailtype.detailtypeid
+				LEFT JOIN `profile` on `profile`.userid = detailcontent.userid
+				where 
+			detailcontent.genemessid = #{genemessid} and detailcontent.picture != '' 
+			and detailcontent.state = 1
+	</select>
+	
+	
+		<!-- 查询相册-->
+	<select id="searchpic" resultType="cn.com.gene.queryvo.DetailCustomer" parameterType="long">
+			SELECT `profile`.avatar , `profile`.realname ,`profile`.username ,
+						detailcontent.picture ,detailcontent.updatetime ,detailcontent.detailcontentid
+			from detailcontent 
+				LEFT JOIN detailtype on detailcontent.detailtypeid = detailtype.detailtypeid
+				LEFT JOIN `profile` on `profile`.userid = detailcontent.userid
+				where 
+			detailcontent.genemessid = #{genemessid} and detailcontent.picture != '' 
+			and detailcontent.state = 1
+			<if test="pagequery !=null ">
+			limit #{pagequery.pagestart} , #{pagequery.pagesize}
+		</if>
+	</select>
+	
+	<!-- 查询相册-->
+	<select id="getgenemessbyuserid" resultType="long" parameterType="long">
+			SELECT genemessconn.genemessid from genemessconn where profileid = #{profileid}
+			ORDER BY state asc  
+		LIMIT 0 ,1 
+	</select>
+	
+	
+	<!-- 查询个人中心数据-->
+	<select id="searchsendcontent" resultType="cn.com.gene.queryvo.DetailCustomer" parameterType="long">
+			SELECT detailcontentid ,detailcontent.title ,detailcontent.updatetime ,detailcontent.picture 
+				, detailtype.typename ,IFNULL(detailaddress.detailes,'')detailes
+				from detailcontent
+				INNER JOIN `profile` on detailcontent.userid = `profile`.userid
+				INNER JOIN detailtype on detailcontent.detailtypeid = detailtype.detailtypeid
+				LEFT JOIN detailaddress on detailaddress.detailid = detailcontent.detailid
+				where detailcontent.userid = #{userid} and detailcontent.state = 1
+			ORDER BY detailcontent.updatetime desc 
+			<if test="pagequery !=null ">
+			limit #{pagequery.pagestart} , #{pagequery.pagesize}
+		</if>
+	</select>
+	<select id="searchsendcontentCount" resultType="integer" parameterType="long">
+			SELECT count(1)
+				from detailcontent
+				INNER JOIN `profile` on detailcontent.userid = `profile`.userid
+				where detailcontent.userid = #{userid} and detailcontent.state = 1
+			ORDER BY detailcontent.updatetime desc 
+	</select>
+	
+	
+	<!-- 编辑的查询 -->
+	<select id="searcheditdetail" resultType="cn.com.gene.pojo.Detailcontent" parameterType="long">
+			SELECT detailcontent.detailcontent , detailcontent.title ,detailcontent.picture ,
+			detailcontent.detailcontentid 
+	from detailcontent where detailcontent.detailcontentid = #{detailcontentid}
+	</select>
+	
+	
+	
+	<!-- 查询我的动态 -->
+	<select id="aboutmydynamic" resultType="cn.com.gene.queryvo.DetailCustomer" >
+			 SELECT genemess.genemessid ,
+			        genemess.genename ,  
+			        detailcontent.detailcontentid ,
+		            detailcontent.picture ,detailcontent.title ,  
+		            IFNULL(brosearch.brocount,0)   brocount ,
+					IFNULL(zansearch.zancount,0)   zancount , 
+					`profile`.username ,`profile`.avatar  ,
+					detailtype.typename , detailaddress.detailes ,
+					IFNULL(messsearch.messcount,0) messcount  , 
+					detailcontent.updatetime ,
+					`user`.telephone  
+	        from detailcontent
+	   inner  JOIN genemess on detailcontent.genemessid = genemess.genemessid
+	   LEFT JOIN `profile` on `profile`.userid = detailcontent.userid
+       LEFT JOIN detailtype on detailtype.detailtypeid = detailcontent.detailtypeid
+       LEFT JOIN detailaddress on detailaddress.detailid = detailcontent.detailid
+       LEFT JOIN `user` on `user`.userid = `profile`.userid
+       <!-- 统计浏览量 -->
+       LEFT JOIN (
+					SELECT SUM(bcount)brocount , browse.otherid  from browse where browse.type = 2 
+	                GROUP BY browse.otherid 
+		) brosearch on brosearch.otherid = detailcontent.detailcontentid
+		<!-- 统计总赞量 -->
+		LEFT JOIN (
+				SELECT COUNT(1)zancount , zan.otherid  from zan  where zan.type = 2 and zan.state = 1  
+				GROUP BY zan.otherid
+	    ) zansearch  on zansearch.otherid = detailcontent.detailcontentid
+		<!-- 统计留言总数 -->
+		LEFT JOIN (
+					SELECT COUNT(1) messcount , otherid  from messages where messages.type = 2 
+	                GROUP BY messages.otherid
+		) messsearch on messsearch.otherid = detailcontent.detailcontentid
+        where 1=1 and 
+       (    detailcontent.genemessid in ( SELECT otherid from fans where fans.type = 1 and fans.userid = #{userid} ) 
+       		or detailcontent.genemessid in (  SELECT genemessid from genemessconn where profileid = #{profileid} 
+       		and state in (1,2,3,4) ) 
+        ) 
+        <if test="searchwhere != null and searchwhere != ''  ">
+        	and genemess.genename LIKE	  CONCAT('%',#{searchwhere},'%')
+        </if>
+        ORDER BY detailcontent.updatetime desc 
+        <!-- 分页参数 -->
+        <if test="pagequery !=null "> limit #{pagequery.pagestart} , #{pagequery.pagesize} </if>
+	</select>
+	
+	
+	<!-- 查询我的动态 -->
+	<select id="aboutmydynamicCount" resultType="integer" >
+			 SELECT  count(1)
+	        from detailcontent
+	   inner  JOIN genemess on detailcontent.genemessid = genemess.genemessid
+	   LEFT JOIN `profile` on `profile`.userid = detailcontent.userid
+       LEFT JOIN detailtype on detailtype.detailtypeid = detailcontent.detailtypeid
+       LEFT JOIN detailaddress on detailaddress.detailid = detailcontent.detailid
+       LEFT JOIN `user` on `user`.userid = `profile`.userid
+       <!-- 统计浏览量 -->
+       LEFT JOIN (
+					SELECT SUM(bcount)brocount , browse.otherid  from browse where browse.type = 2 
+	                GROUP BY browse.otherid 
+		) brosearch on brosearch.otherid = detailcontent.detailcontentid
+		<!-- 统计总赞量 -->
+		LEFT JOIN (
+				SELECT COUNT(1)zancount , zan.otherid  from zan  where zan.type = 2 and zan.state = 1  
+				GROUP BY zan.otherid
+	    ) zansearch  on zansearch.otherid = detailcontent.detailcontentid
+		<!-- 统计留言总数 -->
+		LEFT JOIN (
+					SELECT COUNT(1) messcount , otherid  from messages where messages.type = 2 
+	                GROUP BY messages.otherid
+		) messsearch on messsearch.otherid = detailcontent.detailcontentid
+        where 1=1 and 
+       (    detailcontent.genemessid in ( SELECT otherid from fans where fans.type = 1 and fans.userid = #{userid} ) 
+       		or detailcontent.genemessid in (  SELECT genemessid from genemessconn where profileid = #{profileid} 
+       		and state in (1,2,3,4) ) 
+        )
+        <if test="searchwhere != null and searchwhere != ''  ">
+        	and genemess.genename LIKE CONCAT('%',#{searchwhere},'%')
+        </if>
+	</select>
+	
+
+</mapper>

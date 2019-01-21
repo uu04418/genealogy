@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.gene.mymapper.MessCustomerMapper" >
+
+	
+	<!-- 查询留言消息的总数 -->
+	<select id="messarryCount" resultType="int">
+		select   count(*)
+		from messages
+		inner join user  on  messages.userid=user.userid
+		inner join profile  on  messages.userid=profile.userid
+		where  otherid= #{otherid}  and messages.type = #{type} and messages.state=1  
+	</select>
+	
+	
+		<!-- 房屋详情显示留言列表 -->
+	<select id="messarry" resultType="cn.com.gene.queryvo.MessCustomer" parameterType="cn.com.gene.queryvo.MessVo" >
+		select  messages.messagesid , 
+	            `profile`.avatar ,
+                `profile`.username ,
+                messages.createtime ,
+                messages.updatetime ,
+                messages.messcontent ,
+                messages.userid 
+		    from messages
+		inner join user  on  messages.userid=user.userid
+		inner join profile  on  messages.userid=profile.userid
+		where  otherid=#{otherid} and messages.type = #{messtype} and messages.state='1'
+		order by  messages.updatetime  desc
+		<!-- 分页的查询条件 -->
+		<if test="pagequery !=null ">
+			limit #{pagequery.pagestart} , #{pagequery.pagesize}
+		</if>
+	</select>
+	
+	
+	 <!-- 获取消息回复 -->
+  <select id="getreply" parameterType="long" resultType="cn.com.gene.queryvo.MessReply">
+	  SELECT	messagesreply.messagesreplyid,
+	u.username uname ,f.username fname,messagesreply.messagesid,messagesreply.updatetime ,messagesreply.reply
+	from messagesreply 
+		INNER JOIN (SELECT userid ,avatar,username from `profile`)u on messagesreply.userid = u.userid
+		INNER JOIN (SELECT userid,avatar ,username from `profile`)f on messagesreply.followUserid = f.userid
+	where messagesreply.messagesid = #{messid}
+	ORDER BY messagesreply.updatetime asc
+  </select>
+ 
+</mapper>

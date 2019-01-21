@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.gene.mapper.EducationMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.gene.pojo.Education" >
+    <id column="educationid" property="educationid" jdbcType="INTEGER" />
+    <result column="educationname" property="educationname" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    educationid, educationname
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="cn.com.gene.pojo.EducationExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from education
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from education
+    where educationid = #{educationid,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from education
+    where educationid = #{educationid,jdbcType=INTEGER}
+  </delete>
+  <delete id="deleteByExample" parameterType="cn.com.gene.pojo.EducationExample" >
+    delete from education
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="cn.com.gene.pojo.Education" >
+    insert into education (educationid, educationname)
+    values (#{educationid,jdbcType=INTEGER}, #{educationname,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="cn.com.gene.pojo.Education" >
+    insert into education
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="educationid != null" >
+        educationid,
+      </if>
+      <if test="educationname != null" >
+        educationname,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="educationid != null" >
+        #{educationid,jdbcType=INTEGER},
+      </if>
+      <if test="educationname != null" >
+        #{educationname,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="cn.com.gene.pojo.EducationExample" resultType="java.lang.Integer" >
+    select count(*) from education
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update education
+    <set >
+      <if test="record.educationid != null" >
+        educationid = #{record.educationid,jdbcType=INTEGER},
+      </if>
+      <if test="record.educationname != null" >
+        educationname = #{record.educationname,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update education
+    set educationid = #{record.educationid,jdbcType=INTEGER},
+      educationname = #{record.educationname,jdbcType=VARCHAR}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="cn.com.gene.pojo.Education" >
+    update education
+    <set >
+      <if test="educationname != null" >
+        educationname = #{educationname,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where educationid = #{educationid,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cn.com.gene.pojo.Education" >
+    update education
+    set educationname = #{educationname,jdbcType=VARCHAR}
+    where educationid = #{educationid,jdbcType=INTEGER}
+  </update>
+</mapper>

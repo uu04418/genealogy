@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.gene.mymapper.AreaCustomerMapper" >
+ 
+ 	<!-- 根据城市名称获得code -->
+  	<select id="getcodebycity" resultType="long" parameterType="string">
+  		SELECT MIN(code)code  from area where name like CONCAT('%',#{city},'%') and `level` &lt;3
+  	</select>
+  	
+  	
+  	<!-- 地址查询 -->
+	<select id="getnextareabycode" resultType="cn.com.gene.queryvo.AreaCustomer" parameterType="java.util.List">
+		SELECT *,ifnull(f.name,'中国') fname from area  
+		LEFT JOIN (SELECT * from area where code  in  
+		 <foreach item="item" collection="idsList" separator="," open="(" close=")" index="">    
+          #{item, jdbcType=VARCHAR}    
+        </foreach>    
+		  )f on area.parentId = f.code
+		where area.parentId in 
+		 <foreach item="item" collection="idsList" separator="," open="(" close=")" index="">    
+          #{item, jdbcType=VARCHAR}    
+        </foreach> 
+	</select>
+ 
+ 
+</mapper>

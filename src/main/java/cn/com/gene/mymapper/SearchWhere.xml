@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.gene.mymapper.SearchWhere" >
+ 	
+   <!--  氏族的查询条件  -->
+   <sql id="query_genemess_where">
+   		<if test="genemessCustomer != null  ">
+   			<if test="genemessCustomer.genename != null and genemessCustomer.genename != ''">
+   				and genemess.genename like concat('%',#{genemessCustomer.genename},'%')
+   			</if>
+   			
+   			<if test="genemessCustomer.likecode !=null   ">
+  				and genemess.`code` like CONCAT('%',#{genemessCustomer.likecode},'%')
+  			</if>
+  			
+  			<if test="genemessCustomer.surnameid !=null ">
+	  			AND genemess.surnameid = #{genemessCustomer.surnameid}
+  			</if>
+   		</if>
+   </sql>
+   
+   <!-- 发布类型的查询条件 -->
+   <sql id="query_detailtype_where">
+   		<if test="detailTypeCustomer !=null ">
+   			<if test="detailTypeCustomer.detailliketype !=null and detailTypeCustomer.detailliketype != '' ">
+   				AND detailtype.detailtypeid in ( ${detailTypeCustomer.detailliketype}  )
+   			</if>
+   		</if>
+   </sql>
+   
+   <!-- 发布content 的查询条件 -->
+  <sql id="query_detailcontent_where">
+  	<if test="detailContentCustomer !=null">
+  			<if test="detailContentCustomer.genemessid !=null ">
+	  			AND detailcontent.genemessid = #{detailContentCustomer.genemessid}
+  			</if>
+  	</if>
+  </sql>
+  
+  <!-- 姓氏ID的查询条件 -->
+  <sql id="query_surname_where">
+  		<if test="surNameCustomer !=null">
+  			<if test="surNameCustomer.surnameid !=null">
+				AND surname.surnameid = #{surNameCustomer.surnameid}  			
+  			</if>
+  </if>
+  
+  
+   </sql>
+    <!-- 区域的查询条件 -->
+  	<sql id="query_area_where">
+  		<if test="areaCustomer !=null">
+  			<if test="areaCustomer.code !=null   ">
+  				and area.`code` = #{areaCustomer.code}
+  			</if>
+  			<if test="areaCustomer.likecode !=null   ">
+  				and area.`code` like CONCAT('%',#{areaCustomer.likecode},'%')
+  			</if>
+  		</if>
+  	</sql>
+  
+  
+</mapper>

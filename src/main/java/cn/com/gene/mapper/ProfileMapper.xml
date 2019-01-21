@@ -1,0 +1,439 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.gene.mapper.ProfileMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.gene.pojo.Profile" >
+    <id column="profileid" property="profileid" jdbcType="BIGINT" />
+    <result column="userid" property="userid" jdbcType="BIGINT" />
+    <result column="longitude" property="longitude" jdbcType="DECIMAL" />
+    <result column="latitude" property="latitude" jdbcType="DECIMAL" />
+    <result column="avatar" property="avatar" jdbcType="VARCHAR" />
+    <result column="username" property="username" jdbcType="VARCHAR" />
+    <result column="identity" property="identity" jdbcType="VARCHAR" />
+    <result column="realname" property="realname" jdbcType="VARCHAR" />
+    <result column="sex" property="sex" jdbcType="VARCHAR" />
+    <result column="signstate" property="signstate" jdbcType="INTEGER" />
+    <result column="weixinnub" property="weixinnub" jdbcType="VARCHAR" />
+    <result column="zodiac" property="zodiac" jdbcType="VARCHAR" />
+    <result column="educationid" property="educationid" jdbcType="BIGINT" />
+    <result column="workunit" property="workunit" jdbcType="VARCHAR" />
+    <result column="positionid" property="positionid" jdbcType="BIGINT" />
+    <result column="introduction" property="introduction" jdbcType="VARCHAR" />
+    <result column="rankings" property="rankings" jdbcType="INTEGER" />
+    <result column="updatetime" property="updatetime" jdbcType="TIMESTAMP" />
+    <result column="birthday" property="birthday" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    profileid, userid, longitude, latitude, avatar, username, identity, realname, sex, 
+    signstate, weixinnub, zodiac, educationid, workunit, positionid, introduction, rankings, 
+    updatetime, birthday
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="cn.com.gene.pojo.ProfileExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from profile
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from profile
+    where profileid = #{profileid,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from profile
+    where profileid = #{profileid,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="cn.com.gene.pojo.ProfileExample" >
+    delete from profile
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="cn.com.gene.pojo.Profile" >
+   <selectKey  resultType="long"  order="AFTER"  keyProperty="profileid" >
+            SELECT LAST_INSERT_ID() 
+    </selectKey>
+    insert into profile (profileid, userid, longitude, 
+      latitude, avatar, username, 
+      identity, realname, sex, 
+      signstate, weixinnub, zodiac, 
+      educationid, workunit, positionid, 
+      introduction, rankings, updatetime, 
+      birthday)
+    values (#{profileid,jdbcType=BIGINT}, #{userid,jdbcType=BIGINT}, #{longitude,jdbcType=DECIMAL}, 
+      #{latitude,jdbcType=DECIMAL}, #{avatar,jdbcType=VARCHAR}, #{username,jdbcType=VARCHAR}, 
+      #{identity,jdbcType=VARCHAR}, #{realname,jdbcType=VARCHAR}, #{sex,jdbcType=VARCHAR}, 
+      #{signstate,jdbcType=INTEGER}, #{weixinnub,jdbcType=VARCHAR}, #{zodiac,jdbcType=VARCHAR}, 
+      #{educationid,jdbcType=BIGINT}, #{workunit,jdbcType=VARCHAR}, #{positionid,jdbcType=BIGINT}, 
+      #{introduction,jdbcType=VARCHAR}, #{rankings,jdbcType=INTEGER}, #{updatetime,jdbcType=TIMESTAMP}, 
+      #{birthday,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="cn.com.gene.pojo.Profile" >
+   <selectKey  resultType="long"  order="AFTER"  keyProperty="profileid" >
+            SELECT LAST_INSERT_ID() 
+    </selectKey>
+    insert into profile
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="profileid != null" >
+        profileid,
+      </if>
+      <if test="userid != null" >
+        userid,
+      </if>
+      <if test="longitude != null" >
+        longitude,
+      </if>
+      <if test="latitude != null" >
+        latitude,
+      </if>
+      <if test="avatar != null" >
+        avatar,
+      </if>
+      <if test="username != null" >
+        username,
+      </if>
+      <if test="identity != null" >
+        identity,
+      </if>
+      <if test="realname != null" >
+        realname,
+      </if>
+      <if test="sex != null" >
+        sex,
+      </if>
+      <if test="signstate != null" >
+        signstate,
+      </if>
+      <if test="weixinnub != null" >
+        weixinnub,
+      </if>
+      <if test="zodiac != null" >
+        zodiac,
+      </if>
+      <if test="educationid != null" >
+        educationid,
+      </if>
+      <if test="workunit != null" >
+        workunit,
+      </if>
+      <if test="positionid != null" >
+        positionid,
+      </if>
+      <if test="introduction != null" >
+        introduction,
+      </if>
+      <if test="rankings != null" >
+        rankings,
+      </if>
+      <if test="updatetime != null" >
+        updatetime,
+      </if>
+      <if test="birthday != null" >
+        birthday,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="profileid != null" >
+        #{profileid,jdbcType=BIGINT},
+      </if>
+      <if test="userid != null" >
+        #{userid,jdbcType=BIGINT},
+      </if>
+      <if test="longitude != null" >
+        #{longitude,jdbcType=DECIMAL},
+      </if>
+      <if test="latitude != null" >
+        #{latitude,jdbcType=DECIMAL},
+      </if>
+      <if test="avatar != null" >
+        #{avatar,jdbcType=VARCHAR},
+      </if>
+      <if test="username != null" >
+        #{username,jdbcType=VARCHAR},
+      </if>
+      <if test="identity != null" >
+        #{identity,jdbcType=VARCHAR},
+      </if>
+      <if test="realname != null" >
+        #{realname,jdbcType=VARCHAR},
+      </if>
+      <if test="sex != null" >
+        #{sex,jdbcType=VARCHAR},
+      </if>
+      <if test="signstate != null" >
+        #{signstate,jdbcType=INTEGER},
+      </if>
+      <if test="weixinnub != null" >
+        #{weixinnub,jdbcType=VARCHAR},
+      </if>
+      <if test="zodiac != null" >
+        #{zodiac,jdbcType=VARCHAR},
+      </if>
+      <if test="educationid != null" >
+        #{educationid,jdbcType=BIGINT},
+      </if>
+      <if test="workunit != null" >
+        #{workunit,jdbcType=VARCHAR},
+      </if>
+      <if test="positionid != null" >
+        #{positionid,jdbcType=BIGINT},
+      </if>
+      <if test="introduction != null" >
+        #{introduction,jdbcType=VARCHAR},
+      </if>
+      <if test="rankings != null" >
+        #{rankings,jdbcType=INTEGER},
+      </if>
+      <if test="updatetime != null" >
+        #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="birthday != null" >
+        #{birthday,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="cn.com.gene.pojo.ProfileExample" resultType="java.lang.Integer" >
+    select count(*) from profile
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update profile
+    <set >
+      <if test="record.profileid != null" >
+        profileid = #{record.profileid,jdbcType=BIGINT},
+      </if>
+      <if test="record.userid != null" >
+        userid = #{record.userid,jdbcType=BIGINT},
+      </if>
+      <if test="record.longitude != null" >
+        longitude = #{record.longitude,jdbcType=DECIMAL},
+      </if>
+      <if test="record.latitude != null" >
+        latitude = #{record.latitude,jdbcType=DECIMAL},
+      </if>
+      <if test="record.avatar != null" >
+        avatar = #{record.avatar,jdbcType=VARCHAR},
+      </if>
+      <if test="record.username != null" >
+        username = #{record.username,jdbcType=VARCHAR},
+      </if>
+      <if test="record.identity != null" >
+        identity = #{record.identity,jdbcType=VARCHAR},
+      </if>
+      <if test="record.realname != null" >
+        realname = #{record.realname,jdbcType=VARCHAR},
+      </if>
+      <if test="record.sex != null" >
+        sex = #{record.sex,jdbcType=VARCHAR},
+      </if>
+      <if test="record.signstate != null" >
+        signstate = #{record.signstate,jdbcType=INTEGER},
+      </if>
+      <if test="record.weixinnub != null" >
+        weixinnub = #{record.weixinnub,jdbcType=VARCHAR},
+      </if>
+      <if test="record.zodiac != null" >
+        zodiac = #{record.zodiac,jdbcType=VARCHAR},
+      </if>
+      <if test="record.educationid != null" >
+        educationid = #{record.educationid,jdbcType=BIGINT},
+      </if>
+      <if test="record.workunit != null" >
+        workunit = #{record.workunit,jdbcType=VARCHAR},
+      </if>
+      <if test="record.positionid != null" >
+        positionid = #{record.positionid,jdbcType=BIGINT},
+      </if>
+      <if test="record.introduction != null" >
+        introduction = #{record.introduction,jdbcType=VARCHAR},
+      </if>
+      <if test="record.rankings != null" >
+        rankings = #{record.rankings,jdbcType=INTEGER},
+      </if>
+      <if test="record.updatetime != null" >
+        updatetime = #{record.updatetime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.birthday != null" >
+        birthday = #{record.birthday,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update profile
+    set profileid = #{record.profileid,jdbcType=BIGINT},
+      userid = #{record.userid,jdbcType=BIGINT},
+      longitude = #{record.longitude,jdbcType=DECIMAL},
+      latitude = #{record.latitude,jdbcType=DECIMAL},
+      avatar = #{record.avatar,jdbcType=VARCHAR},
+      username = #{record.username,jdbcType=VARCHAR},
+      identity = #{record.identity,jdbcType=VARCHAR},
+      realname = #{record.realname,jdbcType=VARCHAR},
+      sex = #{record.sex,jdbcType=VARCHAR},
+      signstate = #{record.signstate,jdbcType=INTEGER},
+      weixinnub = #{record.weixinnub,jdbcType=VARCHAR},
+      zodiac = #{record.zodiac,jdbcType=VARCHAR},
+      educationid = #{record.educationid,jdbcType=BIGINT},
+      workunit = #{record.workunit,jdbcType=VARCHAR},
+      positionid = #{record.positionid,jdbcType=BIGINT},
+      introduction = #{record.introduction,jdbcType=VARCHAR},
+      rankings = #{record.rankings,jdbcType=INTEGER},
+      updatetime = #{record.updatetime,jdbcType=TIMESTAMP},
+      birthday = #{record.birthday,jdbcType=TIMESTAMP}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="cn.com.gene.pojo.Profile" >
+    update profile
+    <set >
+      <if test="userid != null" >
+        userid = #{userid,jdbcType=BIGINT},
+      </if>
+      <if test="longitude != null" >
+        longitude = #{longitude,jdbcType=DECIMAL},
+      </if>
+      <if test="latitude != null" >
+        latitude = #{latitude,jdbcType=DECIMAL},
+      </if>
+      <if test="avatar != null" >
+        avatar = #{avatar,jdbcType=VARCHAR},
+      </if>
+      <if test="username != null" >
+        username = #{username,jdbcType=VARCHAR},
+      </if>
+      <if test="identity != null" >
+        identity = #{identity,jdbcType=VARCHAR},
+      </if>
+      <if test="realname != null" >
+        realname = #{realname,jdbcType=VARCHAR},
+      </if>
+      <if test="sex != null" >
+        sex = #{sex,jdbcType=VARCHAR},
+      </if>
+      <if test="signstate != null" >
+        signstate = #{signstate,jdbcType=INTEGER},
+      </if>
+      <if test="weixinnub != null" >
+        weixinnub = #{weixinnub,jdbcType=VARCHAR},
+      </if>
+      <if test="zodiac != null" >
+        zodiac = #{zodiac,jdbcType=VARCHAR},
+      </if>
+      <if test="educationid != null" >
+        educationid = #{educationid,jdbcType=BIGINT},
+      </if>
+      <if test="workunit != null" >
+        workunit = #{workunit,jdbcType=VARCHAR},
+      </if>
+      <if test="positionid != null" >
+        positionid = #{positionid,jdbcType=BIGINT},
+      </if>
+      <if test="introduction != null" >
+        introduction = #{introduction,jdbcType=VARCHAR},
+      </if>
+      <if test="rankings != null" >
+        rankings = #{rankings,jdbcType=INTEGER},
+      </if>
+      <if test="updatetime != null" >
+        updatetime = #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="birthday != null" >
+        birthday = #{birthday,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where profileid = #{profileid,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cn.com.gene.pojo.Profile" >
+    update profile
+    set userid = #{userid,jdbcType=BIGINT},
+      longitude = #{longitude,jdbcType=DECIMAL},
+      latitude = #{latitude,jdbcType=DECIMAL},
+      avatar = #{avatar,jdbcType=VARCHAR},
+      username = #{username,jdbcType=VARCHAR},
+      identity = #{identity,jdbcType=VARCHAR},
+      realname = #{realname,jdbcType=VARCHAR},
+      sex = #{sex,jdbcType=VARCHAR},
+      signstate = #{signstate,jdbcType=INTEGER},
+      weixinnub = #{weixinnub,jdbcType=VARCHAR},
+      zodiac = #{zodiac,jdbcType=VARCHAR},
+      educationid = #{educationid,jdbcType=BIGINT},
+      workunit = #{workunit,jdbcType=VARCHAR},
+      positionid = #{positionid,jdbcType=BIGINT},
+      introduction = #{introduction,jdbcType=VARCHAR},
+      rankings = #{rankings,jdbcType=INTEGER},
+      updatetime = #{updatetime,jdbcType=TIMESTAMP},
+      birthday = #{birthday,jdbcType=TIMESTAMP}
+    where profileid = #{profileid,jdbcType=BIGINT}
+  </update>
+</mapper>

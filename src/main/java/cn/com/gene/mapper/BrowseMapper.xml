@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.gene.mapper.BrowseMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.gene.pojo.Browse" >
+    <id column="browseid" property="browseid" jdbcType="BIGINT" />
+    <result column="followuserid" property="followuserid" jdbcType="BIGINT" />
+    <result column="userid" property="userid" jdbcType="BIGINT" />
+    <result column="otherid" property="otherid" jdbcType="BIGINT" />
+    <result column="bcount" property="bcount" jdbcType="INTEGER" />
+    <result column="type" property="type" jdbcType="INTEGER" />
+    <result column="updatetime" property="updatetime" jdbcType="TIMESTAMP" />
+    <result column="statue" property="statue" jdbcType="INTEGER" />
+    <result column="title" property="title" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    browseid, followuserid, userid, otherid, bcount, type, updatetime, statue, title
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="cn.com.gene.pojo.BrowseExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from browse
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from browse
+    where browseid = #{browseid,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from browse
+    where browseid = #{browseid,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="cn.com.gene.pojo.BrowseExample" >
+    delete from browse
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="cn.com.gene.pojo.Browse" >
+    insert into browse (browseid, followuserid, userid, 
+      otherid, bcount, type, 
+      updatetime, statue, title
+      )
+    values (#{browseid,jdbcType=BIGINT}, #{followuserid,jdbcType=BIGINT}, #{userid,jdbcType=BIGINT}, 
+      #{otherid,jdbcType=BIGINT}, #{bcount,jdbcType=INTEGER}, #{type,jdbcType=INTEGER}, 
+      #{updatetime,jdbcType=TIMESTAMP}, #{statue,jdbcType=INTEGER}, #{title,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="cn.com.gene.pojo.Browse" >
+    insert into browse
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="browseid != null" >
+        browseid,
+      </if>
+      <if test="followuserid != null" >
+        followuserid,
+      </if>
+      <if test="userid != null" >
+        userid,
+      </if>
+      <if test="otherid != null" >
+        otherid,
+      </if>
+      <if test="bcount != null" >
+        bcount,
+      </if>
+      <if test="type != null" >
+        type,
+      </if>
+      <if test="updatetime != null" >
+        updatetime,
+      </if>
+      <if test="statue != null" >
+        statue,
+      </if>
+      <if test="title != null" >
+        title,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="browseid != null" >
+        #{browseid,jdbcType=BIGINT},
+      </if>
+      <if test="followuserid != null" >
+        #{followuserid,jdbcType=BIGINT},
+      </if>
+      <if test="userid != null" >
+        #{userid,jdbcType=BIGINT},
+      </if>
+      <if test="otherid != null" >
+        #{otherid,jdbcType=BIGINT},
+      </if>
+      <if test="bcount != null" >
+        #{bcount,jdbcType=INTEGER},
+      </if>
+      <if test="type != null" >
+        #{type,jdbcType=INTEGER},
+      </if>
+      <if test="updatetime != null" >
+        #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="statue != null" >
+        #{statue,jdbcType=INTEGER},
+      </if>
+      <if test="title != null" >
+        #{title,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="cn.com.gene.pojo.BrowseExample" resultType="java.lang.Integer" >
+    select count(*) from browse
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update browse
+    <set >
+      <if test="record.browseid != null" >
+        browseid = #{record.browseid,jdbcType=BIGINT},
+      </if>
+      <if test="record.followuserid != null" >
+        followuserid = #{record.followuserid,jdbcType=BIGINT},
+      </if>
+      <if test="record.userid != null" >
+        userid = #{record.userid,jdbcType=BIGINT},
+      </if>
+      <if test="record.otherid != null" >
+        otherid = #{record.otherid,jdbcType=BIGINT},
+      </if>
+      <if test="record.bcount != null" >
+        bcount = #{record.bcount,jdbcType=INTEGER},
+      </if>
+      <if test="record.type != null" >
+        type = #{record.type,jdbcType=INTEGER},
+      </if>
+      <if test="record.updatetime != null" >
+        updatetime = #{record.updatetime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.statue != null" >
+        statue = #{record.statue,jdbcType=INTEGER},
+      </if>
+      <if test="record.title != null" >
+        title = #{record.title,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update browse
+    set browseid = #{record.browseid,jdbcType=BIGINT},
+      followuserid = #{record.followuserid,jdbcType=BIGINT},
+      userid = #{record.userid,jdbcType=BIGINT},
+      otherid = #{record.otherid,jdbcType=BIGINT},
+      bcount = #{record.bcount,jdbcType=INTEGER},
+      type = #{record.type,jdbcType=INTEGER},
+      updatetime = #{record.updatetime,jdbcType=TIMESTAMP},
+      statue = #{record.statue,jdbcType=INTEGER},
+      title = #{record.title,jdbcType=VARCHAR}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="cn.com.gene.pojo.Browse" >
+    update browse
+    <set >
+      <if test="followuserid != null" >
+        followuserid = #{followuserid,jdbcType=BIGINT},
+      </if>
+      <if test="userid != null" >
+        userid = #{userid,jdbcType=BIGINT},
+      </if>
+      <if test="otherid != null" >
+        otherid = #{otherid,jdbcType=BIGINT},
+      </if>
+      <if test="bcount != null" >
+        bcount = #{bcount,jdbcType=INTEGER},
+      </if>
+      <if test="type != null" >
+        type = #{type,jdbcType=INTEGER},
+      </if>
+      <if test="updatetime != null" >
+        updatetime = #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="statue != null" >
+        statue = #{statue,jdbcType=INTEGER},
+      </if>
+      <if test="title != null" >
+        title = #{title,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where browseid = #{browseid,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cn.com.gene.pojo.Browse" >
+    update browse
+    set followuserid = #{followuserid,jdbcType=BIGINT},
+      userid = #{userid,jdbcType=BIGINT},
+      otherid = #{otherid,jdbcType=BIGINT},
+      bcount = #{bcount,jdbcType=INTEGER},
+      type = #{type,jdbcType=INTEGER},
+      updatetime = #{updatetime,jdbcType=TIMESTAMP},
+      statue = #{statue,jdbcType=INTEGER},
+      title = #{title,jdbcType=VARCHAR}
+    where browseid = #{browseid,jdbcType=BIGINT}
+  </update>
+</mapper>

@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.gene.mapper.ConsumeMapper" >
+  <resultMap id="BaseResultMap" type="cn.com.gene.pojo.Consume" >
+    <id column="consumeid" property="consumeid" jdbcType="BIGINT" />
+    <result column="userid" property="userid" jdbcType="BIGINT" />
+    <result column="type" property="type" jdbcType="INTEGER" />
+    <result column="monetary" property="monetary" jdbcType="DOUBLE" />
+    <result column="descname" property="descname" jdbcType="VARCHAR" />
+    <result column="updatetime" property="updatetime" jdbcType="TIMESTAMP" />
+    <result column="createtime" property="createtime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    consumeid, userid, type, monetary, descname, updatetime, createtime
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="cn.com.gene.pojo.ConsumeExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from consume
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from consume
+    where consumeid = #{consumeid,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from consume
+    where consumeid = #{consumeid,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="cn.com.gene.pojo.ConsumeExample" >
+    delete from consume
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="cn.com.gene.pojo.Consume" >
+    insert into consume (consumeid, userid, type, 
+      monetary, descname, updatetime, 
+      createtime)
+    values (#{consumeid,jdbcType=BIGINT}, #{userid,jdbcType=BIGINT}, #{type,jdbcType=INTEGER}, 
+      #{monetary,jdbcType=DOUBLE}, #{descname,jdbcType=VARCHAR}, #{updatetime,jdbcType=TIMESTAMP}, 
+      #{createtime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="cn.com.gene.pojo.Consume" >
+    insert into consume
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="consumeid != null" >
+        consumeid,
+      </if>
+      <if test="userid != null" >
+        userid,
+      </if>
+      <if test="type != null" >
+        type,
+      </if>
+      <if test="monetary != null" >
+        monetary,
+      </if>
+      <if test="descname != null" >
+        descname,
+      </if>
+      <if test="updatetime != null" >
+        updatetime,
+      </if>
+      <if test="createtime != null" >
+        createtime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="consumeid != null" >
+        #{consumeid,jdbcType=BIGINT},
+      </if>
+      <if test="userid != null" >
+        #{userid,jdbcType=BIGINT},
+      </if>
+      <if test="type != null" >
+        #{type,jdbcType=INTEGER},
+      </if>
+      <if test="monetary != null" >
+        #{monetary,jdbcType=DOUBLE},
+      </if>
+      <if test="descname != null" >
+        #{descname,jdbcType=VARCHAR},
+      </if>
+      <if test="updatetime != null" >
+        #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createtime != null" >
+        #{createtime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="cn.com.gene.pojo.ConsumeExample" resultType="java.lang.Integer" >
+    select count(*) from consume
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update consume
+    <set >
+      <if test="record.consumeid != null" >
+        consumeid = #{record.consumeid,jdbcType=BIGINT},
+      </if>
+      <if test="record.userid != null" >
+        userid = #{record.userid,jdbcType=BIGINT},
+      </if>
+      <if test="record.type != null" >
+        type = #{record.type,jdbcType=INTEGER},
+      </if>
+      <if test="record.monetary != null" >
+        monetary = #{record.monetary,jdbcType=DOUBLE},
+      </if>
+      <if test="record.descname != null" >
+        descname = #{record.descname,jdbcType=VARCHAR},
+      </if>
+      <if test="record.updatetime != null" >
+        updatetime = #{record.updatetime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.createtime != null" >
+        createtime = #{record.createtime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update consume
+    set consumeid = #{record.consumeid,jdbcType=BIGINT},
+      userid = #{record.userid,jdbcType=BIGINT},
+      type = #{record.type,jdbcType=INTEGER},
+      monetary = #{record.monetary,jdbcType=DOUBLE},
+      descname = #{record.descname,jdbcType=VARCHAR},
+      updatetime = #{record.updatetime,jdbcType=TIMESTAMP},
+      createtime = #{record.createtime,jdbcType=TIMESTAMP}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="cn.com.gene.pojo.Consume" >
+    update consume
+    <set >
+      <if test="userid != null" >
+        userid = #{userid,jdbcType=BIGINT},
+      </if>
+      <if test="type != null" >
+        type = #{type,jdbcType=INTEGER},
+      </if>
+      <if test="monetary != null" >
+        monetary = #{monetary,jdbcType=DOUBLE},
+      </if>
+      <if test="descname != null" >
+        descname = #{descname,jdbcType=VARCHAR},
+      </if>
+      <if test="updatetime != null" >
+        updatetime = #{updatetime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createtime != null" >
+        createtime = #{createtime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where consumeid = #{consumeid,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cn.com.gene.pojo.Consume" >
+    update consume
+    set userid = #{userid,jdbcType=BIGINT},
+      type = #{type,jdbcType=INTEGER},
+      monetary = #{monetary,jdbcType=DOUBLE},
+      descname = #{descname,jdbcType=VARCHAR},
+      updatetime = #{updatetime,jdbcType=TIMESTAMP},
+      createtime = #{createtime,jdbcType=TIMESTAMP}
+    where consumeid = #{consumeid,jdbcType=BIGINT}
+  </update>
+</mapper>
